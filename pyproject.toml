@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mkparity"
+version = "0.1.0"
+description = "Characterizing and mitigating numerical divergence in LLM megakernels"
+requires-python = ">=3.10"
+dependencies = ["torch>=2.4"]
+
+[project.optional-dependencies]
+hf = ["transformers>=4.45"]
+vllm = ["vllm>=0.33"]
+dev = ["pytest>=8", "transformers>=4.45"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "gpu: needs a CUDA GPU",
+    "slow: long-running sweep",
+]

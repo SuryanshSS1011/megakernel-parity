@@ -1,0 +1,262 @@
+{
+ "X1_run_to_run": {
+  "C0": {
+   "name": "C0 invariant reference",
+   "seeds": 2,
+   "prompts": 16,
+   "prompts_identical_across_seeds": 16,
+   "pairwise_divergent_fraction": 0.0,
+   "median_first_divergence": null,
+   "min_first_divergence": null
+  },
+  "C1": {
+   "name": "C1 Hazy-like bf16 store_add",
+   "seeds": 5,
+   "prompts": 16,
+   "prompts_identical_across_seeds": 2,
+   "pairwise_divergent_fraction": 0.53125,
+   "median_first_divergence": 60,
+   "min_first_divergence": 7
+  },
+  "C2": {
+   "name": "C2 fp32 atomicAdd partials",
+   "seeds": 5,
+   "prompts": 16,
+   "prompts_identical_across_seeds": 16,
+   "pairwise_divergent_fraction": 0.0,
+   "median_first_divergence": null,
+   "min_first_divergence": null
+  },
+  "M1": {
+   "name": "M1 ordered fp32 combine (fix for C1)",
+   "seeds": 2,
+   "prompts": 16,
+   "prompts_identical_across_seeds": 16,
+   "pairwise_divergent_fraction": 0.0,
+   "median_first_divergence": null,
+   "min_first_divergence": null
+  }
+ },
+ "X1b_logits_run_to_run": {
+  "C1": {
+   "rows": 2064,
+   "bitwise_equal_rate": 0.0,
+   "max_abs_logit_diff": 0.119140625
+  },
+  "C2": {
+   "rows": 2064,
+   "bitwise_equal_rate": 0.8662790697674418,
+   "max_abs_logit_diff": 0.02187347412109375
+  },
+  "M1": {
+   "rows": 2064,
+   "bitwise_equal_rate": 1.0,
+   "max_abs_logit_diff": 0.0
+  }
+ },
+ "X2_verify_vs_decode": {
+  "C0_k1": {
+   "name": "C0 invariant reference",
+   "k": 1,
+   "M": 2,
+   "rows": 2016,
+   "bitwise_equal_rate": 1.0,
+   "argmax_flip_rate": 0.0,
+   "max_abs_logit_diff": 0.0
+  },
+  "C0_k3": {
+   "name": "C0 invariant reference",
+   "k": 3,
+   "M": 4,
+   "rows": 1984,
+   "bitwise_equal_rate": 1.0,
+   "argmax_flip_rate": 0.0,
+   "max_abs_logit_diff": 0.0
+  },
+  "C0_k7": {
+   "name": "C0 invariant reference",
+   "k": 7,
+   "M": 8,
+   "rows": 1920,
+   "bitwise_equal_rate": 1.0,
+   "argmax_flip_rate": 0.0,
+   "max_abs_logit_diff": 0.0
+  },
+  "C3_k1": {
+   "name": "C3 shape-dependent schedule",
+   "k": 1,
+   "M": 2,
+   "rows": 2016,
+   "bitwise_equal_rate": 0.9747023809523809,
+   "argmax_flip_rate": 0.0,
+   "max_abs_logit_diff": 0.016936779022216797
+  },
+  "C3_k3": {
+   "name": "C3 shape-dependent schedule",
+   "k": 3,
+   "M": 4,
+   "rows": 1984,
+   "bitwise_equal_rate": 0.9652217741935484,
+   "argmax_flip_rate": 0.0,
+   "max_abs_logit_diff": 0.016936779022216797
+  },
+  "C3_k7": {
+   "name": "C3 shape-dependent schedule",
+   "k": 7,
+   "M": 8,
+   "rows": 1920,
+   "bitwise_equal_rate": 0.95,
+   "argmax_flip_rate": 0.0,
+   "max_abs_logit_diff": 0.016936779022216797
+  },
+  "M2_k1": {
+   "name": "M2 shape-invariant schedule (fix for C3)",
+   "k": 1,
+   "M": 2,
+   "rows": 2016,
+   "bitwise_equal_rate": 1.0,
+   "argmax_flip_rate": 0.0,
+   "max_abs_logit_diff": 0.0
+  },
+  "M2_k3": {
+   "name": "M2 shape-invariant schedule (fix for C3)",
+   "k": 3,
+   "M": 4,
+   "rows": 1984,
+   "bitwise_equal_rate": 1.0,
+   "argmax_flip_rate": 0.0,
+   "max_abs_logit_diff": 0.0
+  },
+  "M2_k7": {
+   "name": "M2 shape-invariant schedule (fix for C3)",
+   "k": 7,
+   "M": 8,
+   "rows": 1920,
+   "bitwise_equal_rate": 1.0,
+   "argmax_flip_rate": 0.0,
+   "max_abs_logit_diff": 0.0
+  },
+  "C1_k1": {
+   "name": "C1 Hazy-like bf16 store_add",
+   "k": 1,
+   "M": 2,
+   "rows": 2016,
+   "bitwise_equal_rate": 1.0,
+   "argmax_flip_rate": 0.0,
+   "max_abs_logit_diff": 0.0
+  },
+  "C1_k3": {
+   "name": "C1 Hazy-like bf16 store_add",
+   "k": 3,
+   "M": 4,
+   "rows": 1984,
+   "bitwise_equal_rate": 1.0,
+   "argmax_flip_rate": 0.0,
+   "max_abs_logit_diff": 0.0
+  },
+  "C1_k7": {
+   "name": "C1 Hazy-like bf16 store_add",
+   "k": 7,
+   "M": 8,
+   "rows": 1920,
+   "bitwise_equal_rate": 1.0,
+   "argmax_flip_rate": 0.0,
+   "max_abs_logit_diff": 0.0
+  }
+ },
+ "X3_spec_vs_greedy": {
+  "C0": {
+   "name": "C0 invariant reference",
+   "k": 4,
+   "prompts": 16,
+   "exact_match": 16,
+   "exact_match_rate": 1.0,
+   "median_first_divergence": null,
+   "acceptance_rate": 0.37636363636363634,
+   "tokens_per_step": 1.6609894566098946
+  },
+  "C3": {
+   "name": "C3 shape-dependent schedule",
+   "k": 4,
+   "prompts": 16,
+   "exact_match": 16,
+   "exact_match_rate": 1.0,
+   "median_first_divergence": null,
+   "acceptance_rate": 0.37751371115173676,
+   "tokens_per_step": 1.665040650406504
+  },
+  "M2": {
+   "name": "M2 shape-invariant schedule (fix for C3)",
+   "k": 4,
+   "prompts": 16,
+   "exact_match": 16,
+   "exact_match_rate": 1.0,
+   "median_first_divergence": null,
+   "acceptance_rate": 0.37772727272727274,
+   "tokens_per_step": 1.6636880584890332
+  },
+  "C1": {
+   "name": "C1 Hazy-like bf16 store_add",
+   "k": 4,
+   "prompts": 16,
+   "exact_match": 7,
+   "exact_match_rate": 0.4375,
+   "median_first_divergence": 47,
+   "acceptance_rate": 0.37339246119733926,
+   "tokens_per_step": 1.6897689768976898
+  }
+ },
+ "X4_fidelity": {
+  "C0": {
+   "name": "C0 invariant reference",
+   "rows": 2064,
+   "mean_kl_vs_fp32": 1.778626140430199e-05,
+   "top1_agreement": 0.997577519379845
+  },
+  "C1": {
+   "name": "C1 Hazy-like bf16 store_add",
+   "rows": 2064,
+   "mean_kl_vs_fp32": 4.427212689266672e-05,
+   "top1_agreement": 0.9869186046511628
+  },
+  "M1": {
+   "name": "M1 ordered fp32 combine (fix for C1)",
+   "rows": 2064,
+   "mean_kl_vs_fp32": 3.86805113769647e-05,
+   "top1_agreement": 0.9859496124031008
+  },
+  "C2": {
+   "name": "C2 fp32 atomicAdd partials",
+   "rows": 2064,
+   "mean_kl_vs_fp32": 1.751090830474029e-05,
+   "top1_agreement": 0.9966085271317829
+  }
+ },
+ "X5_margins": {
+  "n": 2064,
+  "p01": 0.005324840545654297,
+  "p05": 0.029612064361572266,
+  "p10": 0.06937551498413086,
+  "p50": 0.7135796546936035,
+  "frac_below_0p01": 0.01937984496124031,
+  "frac_below_0p05": 0.07897286821705427,
+  "frac_below_0p1": 0.13662790697674418
+ },
+ "meta": {
+  "prompts": 16,
+  "gen": 128,
+  "prompt_len": 48,
+  "seeds": 5,
+  "model": {
+   "vocab": 65,
+   "d": 256,
+   "n_layers": 4,
+   "n_heads": 8,
+   "n_kv": 2,
+   "ffn": 1024,
+   "max_len": 1024,
+   "eps": 1e-05
+  },
+  "runtime_s": 715.7427227497101
+ }
+}

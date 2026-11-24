@@ -1,0 +1,36 @@
+{
+ "C3_spec_vs_greedy": {
+  "prompts": 40,
+  "gen": 384,
+  "exact": 29,
+  "first_divergences": [
+   60,
+   81,
+   124,
+   151,
+   237,
+   300,
+   302,
+   302,
+   307,
+   378,
+   382
+  ]
+ },
+ "C2_seed0_vs_seed1": {
+  "prompts": 40,
+  "gen": 384,
+  "exact": 31,
+  "first_divergences": [
+   132,
+   223,
+   240,
+   254,
+   280,
+   286,
+   355,
+   356,
+   372
+  ]
+ }
+}

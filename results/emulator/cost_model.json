@@ -1,0 +1,92 @@
+[
+ {
+  "gpu": "H100 SXM",
+  "model": "Llama-3.2-1B",
+  "weight_stream_ms": 0.738,
+  "m1_extra_bytes": 1048576,
+  "m1_extra_traffic_pct": 0.0424,
+  "crossover_rows_cuda_core": 20.0,
+  "crossover_rows_tensor_core": 295.2,
+  "m2_step_time_ratio_vs_decode_cuda_core": {
+   "1": 1.0,
+   "2": 1.0,
+   "4": 1.0,
+   "8": 1.0
+  }
+ },
+ {
+  "gpu": "H100 SXM",
+  "model": "Qwen3-1.7B",
+  "weight_stream_ms": 1.027,
+  "m1_extra_bytes": 1376256,
+  "m1_extra_traffic_pct": 0.04,
+  "crossover_rows_cuda_core": 20.0,
+  "crossover_rows_tensor_core": 295.2,
+  "m2_step_time_ratio_vs_decode_cuda_core": {
+   "1": 1.0,
+   "2": 1.0,
+   "4": 1.0,
+   "8": 1.0
+  }
+ },
+ {
+  "gpu": "A100 80GB SXM",
+  "model": "Llama-3.2-1B",
+  "weight_stream_ms": 1.212,
+  "m1_extra_bytes": 1048576,
+  "m1_extra_traffic_pct": 0.0424,
+  "crossover_rows_cuda_core": 9.6,
+  "crossover_rows_tensor_core": 153.0,
+  "m2_step_time_ratio_vs_decode_cuda_core": {
+   "1": 1.0,
+   "2": 1.0,
+   "4": 1.0,
+   "8": 1.0
+  }
+ },
+ {
+  "gpu": "A100 80GB SXM",
+  "model": "Qwen3-1.7B",
+  "weight_stream_ms": 1.687,
+  "m1_extra_bytes": 1376256,
+  "m1_extra_traffic_pct": 0.04,
+  "crossover_rows_cuda_core": 9.6,
+  "crossover_rows_tensor_core": 153.0,
+  "m2_step_time_ratio_vs_decode_cuda_core": {
+   "1": 1.0,
+   "2": 1.0,
+   "4": 1.0,
+   "8": 1.0
+  }
+ },
+ {
+  "gpu": "A40",
+  "model": "Llama-3.2-1B",
+  "weight_stream_ms": 3.552,
+  "m1_extra_bytes": 1048576,
+  "m1_extra_traffic_pct": 0.0424,
+  "crossover_rows_cuda_core": 53.7,
+  "crossover_rows_tensor_core": 215.1,
+  "m2_step_time_ratio_vs_decode_cuda_core": {
+   "1": 1.0,
+   "2": 1.0,
+   "4": 1.0,
+   "8": 1.0
+  }
+ },
+ {
+  "gpu": "A40",
+  "model": "Qwen3-1.7B",
+  "weight_stream_ms": 4.943,
+  "m1_extra_bytes": 1376256,
+  "m1_extra_traffic_pct": 0.04,
+  "crossover_rows_cuda_core": 53.7,
+  "crossover_rows_tensor_core": 215.1,
+  "m2_step_time_ratio_vs_decode_cuda_core": {
+   "1": 1.0,
+   "2": 1.0,
+   "4": 1.0,
+   "8": 1.0
+  }
+ }
+]
