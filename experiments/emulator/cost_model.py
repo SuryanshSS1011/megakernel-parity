@@ -12,7 +12,7 @@ import json
 GPUS = {
     # name: (HBM bytes/s, fp32 CUDA-core FLOP/s, bf16 dense tensor FLOP/s)
     "H100 SXM": (3.35e12, 67e12, 989e12),
-    "A100 80GB SXM": (2.039e12, 19.5e12, 312e12),
+    "A100 40GB": (1.555e12, 19.5e12, 312e12),  # the A100 model on ROAR Collab
     "A40": (0.696e12, 37.4e12, 149.7e12),
 }
 MODELS = {
