@@ -22,8 +22,8 @@ results/**/test_rank*.cu
 results/**/*.demo.json
 *.so
 
-# secrets: tokens live in ~/.mkparity.env and ~/.modal.toml, never in the repo
+# secrets: the token lives in .env (local only) and ~/.modal.toml, never in git
 .env
+.env.*
 *.env
-.mkparity.env
 .modal.toml

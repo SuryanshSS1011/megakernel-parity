@@ -27,7 +27,7 @@ Megakernels fuse a whole forward pass into one persistent GPU kernel. They are f
 | `RUNBOOK.md` | Every GPU task the study needs, in order, with the steps only a person can do |
 | `CLAUDE.md` | Rules for a coding agent running the RUNBOOK tasks on the cluster |
 | `slurm/` | ROAR Collab setup, the `submit.sh` wrapper and one batch script per task |
-| `env.example` | Template for the private `~/.mkparity.env` that holds the token and Slurm account |
+| `env.example` | Template for the git-ignored `.env` that holds the token and Slurm account |
 | `docs/run_log.md` | Log of every GPU job, its outcome and any fix it needed |
 | `experiments/emulator/` | CPU characterization scripts and the roofline cost model |
 | `results/emulator/` | Results from the first emulator runs (Nov 21, 2026) |

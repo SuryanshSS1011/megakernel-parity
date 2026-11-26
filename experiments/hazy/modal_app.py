@@ -1,9 +1,9 @@
 """Run E3 (Hazy run-to-run determinism) on a Modal H100.
 
-One-time setup on your machine:
-  pip install modal && modal setup
-  modal secret create huggingface HF_TOKEN=hf_...   # token with Llama-3.2 access
-  python scripts/build_prompts.py                    # writes data/prompts/eval64.jsonl
+One-time setup:
+  pip install modal && modal token new
+  bash scripts/modal_hf_secret.sh     # copies HF_TOKEN from .env into the Modal secret "huggingface"
+  python scripts/build_prompts.py     # writes data/prompts/eval64.jsonl
 
 Cheap first run, about 5 GPU-minutes:
   modal run experiments/hazy/modal_app.py --limit 2 --reps 3 --ntok 64

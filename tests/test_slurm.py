@@ -26,7 +26,8 @@ def test_jobs_have_time_and_gpu_and_no_account():
 
 def _submit(tmp_path, *args, account="abc123_gpu"):
     env = dict(os.environ, HOME=str(tmp_path), MKP_WORK=str(tmp_path / "w"),
-               MKP_SCRATCH=str(tmp_path / "s"), ROAR_ACCOUNT=account)
+               MKP_SCRATCH=str(tmp_path / "s"), ROAR_ACCOUNT=account,
+               MKP_ENV_FILE=str(tmp_path / "no.env"))  # ignore a real .env on the cluster
     return subprocess.run(["bash", str(REPO / "slurm" / "submit.sh"), *args], env=env,
                           capture_output=True, text=True)
 
@@ -44,6 +45,13 @@ def test_submit_refuses_bad_input(tmp_path):
     assert _submit(tmp_path, "nope", "--dry-run").returncode == 2
     assert _submit(tmp_path, "smoke", "--gpu", "h100", "--dry-run").returncode == 2
     assert _submit(tmp_path, "smoke", "--dry-run", "--", "--export=X").returncode == 2
+
+
+def test_env_file_is_ignored():
+    r = subprocess.run(["git", "-C", str(REPO), "check-ignore", "-q", ".env"])
+    assert r.returncode == 0, ".env must be git-ignored"
+    r = subprocess.run(["git", "-C", str(REPO), "check-ignore", "-q", "env.example"])
+    assert r.returncode == 1, "env.example must stay tracked"
 
 
 def test_no_tokens_in_tracked_text():

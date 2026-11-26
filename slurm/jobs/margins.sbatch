@@ -3,7 +3,7 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --gres=gpu:a40:1
-# T10: fp32 top-2 margin at each first divergence. MKP_PAIRS lists "a:b" arm pairs
+# T9: fp32 top-2 margin at each first divergence. MKP_PAIRS lists "a:b" arm pairs
 # that results/summary.md shows diverging; every GPU directory holding both arms is used.
 source "${MKP_REPO:-$SLURM_SUBMIT_DIR}/slurm/common.sh"
 mkp_banner

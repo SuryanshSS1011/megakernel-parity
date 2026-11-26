@@ -6,14 +6,14 @@ This repository measures numerical divergence in LLM megakernels. `docs/plan.md`
 
 1. The repository lives on ROAR Collab, a Slurm cluster. Login nodes have internet but no GPU, and compute nodes have GPUs but may have no internet.
 2. Run every GPU workload through `slurm/submit.sh`, never directly on a login node. Use login nodes only for git, pip, downloads, editing and CPU analysis such as `scripts/analyze.py`.
-3. The cluster offers A40 (sm_86, 84 SMs) and A100 40GB (sm_80, 108 SMs) GPUs. It has no H100, so the Hazy runs go to Modal (task T9).
-4. Paths, modules and the Slurm account come from `~/.mkparity.env`, which follows `env.example`. Fix a wrong module name or path there, not in the scripts.
+3. The cluster offers A40 (sm_86, 84 SMs) and A100 40GB (sm_80, 108 SMs) GPUs. It has no H100, so the Hazy runs go to Modal in the last task, T10.
+4. Paths, modules, the Slurm account and the HF token come from `.env` in the repository root, which follows `env.example` and is git-ignored. Fix a wrong module name or path there, not in the scripts.
 
 ## Secrets
 
-1. Never print, `cat`, `echo` or log `HF_TOKEN`, `~/.mkparity.env`, `~/.modal.toml` or `~/.cache/huggingface/token`. Check whether a token is set with `[[ -n "$HF_TOKEN" ]]` and nothing more.
+1. Never print, `cat`, `echo` or log `HF_TOKEN`, the contents of `.env`, `~/.modal.toml` or `~/.cache/huggingface/token`. Check whether a token is set with `[[ -n "$HF_TOKEN" ]]` and nothing more. To add a line to `.env`, append it with `>>` instead of rewriting the file.
 2. Never pass a token as a command-line argument, because other users on a shared node can see process arguments. `scripts/modal_hf_secret.sh` shows the safe pattern.
-3. Never commit a token or a file that holds one. If a token appears in any output, log or file, stop and tell the user so they can revoke it.
+3. Never commit a token or a file that holds one, and never remove `.env` from `.gitignore`. If a token appears in any output, log or file, stop and tell the user so they can revoke it. The repository's GitHub Actions secret is not used by any task here.
 
 ## Keeping the experiment intact
 
@@ -29,7 +29,7 @@ Stop, record the finding in `docs/run_log.md`, commit and report to the user in 
 1. The MPK build fails twice for the same reason.
 2. Every MPK arm fails in the smoke test (task T4). This is the project's go/no-go gate.
 3. Any job fails twice in a row for the same reason.
-4. Modal spending would pass $15 for task T9 or $25 in total.
+4. Modal spending would pass $15 for task T10 or $25 in total.
 5. A storage quota is exceeded. `quota_check` reports usage.
 6. A task needs a decision the RUNBOOK does not cover, such as changing the experiment definition.
 

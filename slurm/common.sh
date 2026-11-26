@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
 # Shared environment for megakernel-parity on ROAR Collab.
 # Sourced by slurm/setup.sh, slurm/submit.sh and every slurm/jobs/*.sbatch.
-# Override any variable in ~/.mkparity.env (template: env.example).
+# Settings and the HF token come from .env in the repository root, which git
+# ignores (template: env.example). MKP_ENV_FILE points elsewhere if needed.
 set -eo pipefail
 
-if [[ -f "$HOME/.mkparity.env" ]]; then
-  set -a; source "$HOME/.mkparity.env"; set +a
+export MKP_REPO="${MKP_REPO:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+MKP_ENV_FILE="${MKP_ENV_FILE:-$MKP_REPO/.env}"
+if [[ -f "$MKP_ENV_FILE" ]]; then
+  set -a; source "$MKP_ENV_FILE"; set +a
 fi
 
 export MKP_WORK="${MKP_WORK:-/storage/work/$USER}"
 export MKP_SCRATCH="${MKP_SCRATCH:-/scratch/$USER}"
-export MKP_REPO="${MKP_REPO:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 export MKP_ENV="${MKP_ENV:-$MKP_WORK/envs/mkparity}"
 export MIRAGE_ROOT="${MIRAGE_ROOT:-$MKP_WORK/mirage}"
 export MIRAGE_HOME="$MIRAGE_ROOT"
@@ -26,7 +28,7 @@ export PYTHONUNBUFFERED=1
 mkdir -p "$HF_HOME" "$PIP_CACHE_DIR" "$MKP_REPO/slurm/logs"
 
 # Module names differ between clusters and change over time. Override them in
-# ~/.mkparity.env after checking `module avail python` and `module avail cuda`.
+# .env after checking `module avail python` and `module avail cuda`.
 _mkp_module() {
   command -v module >/dev/null 2>&1 || return 1
   set +u; module load "$1" >/dev/null 2>&1; local rc=$?; return $rc

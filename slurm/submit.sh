@@ -33,7 +33,7 @@ script="$here/jobs/$job.sbatch"
 [[ -f "$script" ]] || { echo "no such job: $script" >&2; ls "$here/jobs" >&2; exit 2; }
 case "$gpu" in a40|a100) ;; *) echo "--gpu must be a40 or a100" >&2; exit 2 ;; esac
 if [[ -z "${ROAR_ACCOUNT:-}" ]]; then
-  echo "ROAR_ACCOUNT is not set; add it to ~/.mkparity.env" >&2; exit 2
+  echo "ROAR_ACCOUNT is not set; add it to .env in the repository root" >&2; exit 2
 fi
 
 cmd=(sbatch --parsable

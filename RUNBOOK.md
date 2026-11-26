@@ -1,69 +1,14 @@
 # GPU Runbook
 
-This file lists every GPU task the study needs, in order. Part A covers the steps only a person can do, such as creating tokens and logging in. Part B covers the tasks a coding agent such as Claude Code would run on ROAR Collab through Slurm. Part C covers the Hazy runs on a Modal H100, because ROAR has no H100. Part D lists optional runs. No GPU measurement has been taken yet, so the time estimates are first guesses that T4's logs would revise.
+This file lists every GPU task the study needs, in order, for a coding agent such as Claude Code. Part 1 runs on ROAR Collab's A40 and A100 GPUs through Slurm. Part 2 runs the Hazy megakernel on a Modal H100, because ROAR has no H100. No GPU measurement has been taken yet, so the time estimates are first guesses that T4's logs would revise.
 
-The agent rules live in `CLAUDE.md`. They cover secrets, stop conditions and what to commit.
+The agent rules live in `CLAUDE.md`. They cover secrets, stop conditions and what to commit. Settings and the HF token come from `.env` in the repository root, which git ignores.
 
-## Part A: steps for you
-
-### U1. Merge the runbook branch and clone on ROAR
-
-Merge the open pull request that adds this file, then clone `main` into work storage on a ROAR login node.
-
-```bash
-cd /storage/work/$USER
-git clone https://github.com/SuryanshSS1011/megakernel-parity && cd megakernel-parity
-git config user.name "Suryansh Sijwali"
-git config user.email "suryanshss1011@gmail.com"
-```
-
-The agent will push results back, so the login node also needs push access. Running `gh auth login` once is the simplest way, and an SSH key added to GitHub also works.
-
-### U2. Create the Hugging Face token
-
-The token belongs in a private file in your home directory, not in the repository or the code. The repository is public, and a committed token stays readable in git history even after it is deleted.
-
-1. On huggingface.co, open Settings, then Access Tokens, and create a fine-grained token.
-2. Under Repositories, tick "Read access to contents of all public gated repos you can access". Leave every write and inference permission off.
-3. A classic Read token would also work, but it can read every private repository you own, so the fine-grained token is the safer choice.
-
-### U3. Fill in the private settings file
-
-```bash
-cp env.example ~/.mkparity.env && chmod 600 ~/.mkparity.env
-sacctmgr show assoc user=$USER format=account%30,partition%20   # lists your Slurm accounts
-nano ~/.mkparity.env      # set HF_TOKEN, ROAR_ACCOUNT and ROAR_PARTITION
-```
-
-Use `ROAR_PARTITION=standard` for a paid credit account and `sla-prio` for an allocation. GPUs need a paid account or allocation, so the free open queue would not work.
-
-### U4. Log in to Modal
-
-```bash
-source /storage/work/$USER/envs/mkparity/bin/activate   # exists after task T2
-modal token new          # prints a URL; open it in your browser to approve
-```
-
-Then open the Modal dashboard and set a workspace spending limit of $50 under Settings, so no bug can spend past the budget.
-
-### U5. Start the agent
-
-Start Claude Code from the repository root on a ROAR login node and give it this prompt.
-
-```text
-Read CLAUDE.md, RUNBOOK.md, docs/plan.md and docs/evaluation.md. Then work through
-RUNBOOK.md Part B and Part C in order, starting at T1. Follow CLAUDE.md exactly,
-especially the secrets, stop conditions and commit rules. Report after each task.
-Do not start Part D unless I ask.
-```
-
-## Part B: tasks for the agent on ROAR
-
-Every GPU task runs as `slurm/submit.sh <job> --gpu a40|a100`, which reads the account from `~/.mkparity.env` and prints the job id. Jobs write their console output to `slurm/logs/`.
+## Overview
 
 | Task | Job | GPU | Depends on | Estimate |
 |---|---|---|---|---|
-| T1 | `probe` | A40 | U3 | 15 min |
+| T1 | `probe` | A40 | none | 15 min |
 | T2 | `slurm/setup.sh` on the login node | none | T1 | 30 to 60 min |
 | T3 | `build` | A40 | T2 | 30 to 90 min |
 | T4 | `smoke` | A40 | T3 | 1 to 3 h |
@@ -71,11 +16,26 @@ Every GPU task runs as `slurm/submit.sh <job> --gpu a40|a100`, which reads the a
 | T6 | `hf_baselines` | A40 | T2 | 1 to 2 h |
 | T7 | `full` | A40 | T4 | 8 to 14 h |
 | T8 | `cross` | A100 | T4 | 4 to 7 h |
-| T10 | `margins` | A40 | T7, T8 | 1 to 2 h |
+| T9 | `margins` | A40 | T7, T8 | 1 to 2 h |
+| T10 | `modal run` from the login node | Modal H100 | T2 | 20 to 40 H100-min |
 
-T5, T6, T7 and T8 can run at the same time once T4 passes, because they use different GPUs or write to different folders. The total would be roughly 17 to 30 GPU-hours.
+T5, T6, T7 and T8 can run at the same time once T4 passes, because they use different GPUs or write to different folders. Part 1 would take roughly 17 to 30 GPU-hours on ROAR. T10 only needs T2, so it could start early, but it is listed last because it is the only task that costs money.
 
-### T1. Probe a GPU node
+## Part 1: ROAR Collab (A40 and A100)
+
+Every GPU task here runs as `slurm/submit.sh <job> --gpu a40|a100`, which reads the account from `.env` and prints the job id. Jobs write their console output to `slurm/logs/`.
+
+### T1. Check the settings and probe a GPU node
+
+First confirm that `.env` exists and sets `HF_TOKEN`, without printing it.
+
+```bash
+set -a; source .env; set +a
+[[ -n "$HF_TOKEN" ]] && echo "HF_TOKEN set" || echo "HF_TOKEN missing"
+[[ -n "$ROAR_ACCOUNT" ]] && echo "account $ROAR_ACCOUNT" || sacctmgr show assoc user=$USER format=account%30,partition%20
+```
+
+If `ROAR_ACCOUNT` is missing and `sacctmgr` lists exactly one account, append `ROAR_ACCOUNT=<name>` and `ROAR_PARTITION=standard` to `.env`, or `sla-prio` if the account is an allocation. If it lists several, ask the user which one to charge. Then submit the probe.
 
 ```bash
 slurm/submit.sh probe --gpu a40
@@ -83,7 +43,7 @@ slurm/submit.sh probe --gpu a40
 
 **Purpose:** The probe records the driver version, the CUDA and Python modules, partition time limits, and whether compute nodes reach the internet.
 
-**Then:** Pick the newest CUDA 12.x module whose version does not exceed the CUDA version `nvidia-smi` reports, and a Python 3.10 to 3.12 module. Write them to `~/.mkparity.env` as `MKP_CUDA_MODULE` and `MKP_PYTHON_MODULE`. If compute nodes do reach the internet, nothing else changes, because jobs read models from the cache either way.
+**Then:** Pick the newest CUDA 12.x module whose version does not exceed the CUDA version `nvidia-smi` reports, and a Python 3.10 to 3.12 module. Append them to `.env` as `MKP_CUDA_MODULE` and `MKP_PYTHON_MODULE`. Jobs read models from the cache whether or not compute nodes reach the internet, so nothing else changes.
 
 ### T2. Set up on the login node
 
@@ -93,7 +53,7 @@ bash slurm/setup.sh
 
 **Purpose:** Setup creates the virtual environment in work storage, installs a torch build that matches the CUDA module, clones mirage at `ed771bd` and Hazy at `7309cec`, prefetches the Rust crates, downloads Qwen3-1.7B, Qwen3-0.6B and Llama-3.2-1B-Instruct into scratch and builds the prompt set. Each step can be rerun alone, for example `bash slurm/setup.sh models`.
 
-**Acceptance:** `data/prompts/eval64.jsonl` has 64 lines, and the model step prints `ok` for all three models. A Llama failure here means the token lacks gated-repo access, which goes back to U2.
+**Acceptance:** `data/prompts/eval64.jsonl` has 64 lines, and the model step prints `ok` for all three models. A Llama failure here means the token lacks gated-repo read access, which only the user can fix, so report it and continue with the Qwen tasks.
 
 ### T3. Build MPK
 
@@ -155,7 +115,7 @@ X=$(slurm/submit.sh cross --gpu a100)
 
 **Acceptance:** `results/summary.md` shows an A40 against A100 row, and `results/mpk_kernels/A100-*.json` exists.
 
-### T10. Margin analysis
+### T9. Margin analysis
 
 Run this after T7 and T8. Pass the arm pairs that `results/summary.md` shows diverging.
 
@@ -167,14 +127,22 @@ slurm/submit.sh margins --gpu a40 --env MKP_PAIRS="ns:spec_k3 ns:spec_k5"
 
 **Acceptance:** There is one `results/margins/*.json` per GPU and pair. Then write a short findings note in `docs/run_log.md` covering exact-match rates with their 95% intervals, median first-divergence positions and margin distributions.
 
-## Part C: Hazy on a Modal H100
+### Optional ROAR runs, only when the user asks
 
-### T9. Hazy run-to-run determinism
+1. **O1, Hazy on the A100:** `slurm/submit.sh hazy_a100_build --gpu a100` tries the Hazy build with `GPU=A100`. The low-latency kernel uses Hopper TMA instructions, so it is expected to fail, and the log is the result either way. A success would move T10 off Modal.
+2. **O2, MPK on Llama-3.2-1B-Instruct:** Both megakernels would then run the same model. MPK's `demo/llama3/demo.py` lacks the `--prompt`, `--save-tokens`, `--ignore-eos` and `--max-new-tokens` flags the runner relies on, so this needs a second patch set in `patch_demo.py` and a `--demo llama3` option in `run_mpk.py`. Two risks are known. Llama-3.2-1B uses a head dimension of 64, while `tasks/ampere/single_batch_gqa.cuh` hard-codes 128 and `rotary_embedding.cuh` defaults to 128. The model also ties its input and output embeddings. The port would pass if the `ns` arm matches the `torch` arm on the first 16 tokens of the smoke prompt, and it would be capped at 6 GPU jobs before stopping with a written explanation.
+3. **O3, Qwen3-8B on the A40:** `slurm/submit.sh full --gpu a40 --env MKP_MODEL=Qwen/Qwen3-8B` would test whether the findings hold at a production size. It needs `MKP_MODELS=Qwen/Qwen3-8B bash slurm/setup.sh models` first, and it fits in 48 GB.
+4. **O4, vLLM baseline:** `harness/parity_vllm.py` would need its own virtual environment, because vLLM pins its own torch. It would compare the `ref` arm with the `ngram` arm at k = 4 on the A100.
 
-This task runs from the ROAR login node, because Modal does the GPU work remotely. It needs U4 and T2, and it can run any time after them. If `~/.modal.toml` does not exist, Modal is not logged in yet, so ask the user to do U4 and move on to other tasks meanwhile.
+## Part 2: H100 on Modal
+
+### T10. Hazy run-to-run determinism
+
+This task runs from the ROAR login node, because Modal does the GPU work remotely. It needs the Modal login in `~/.modal.toml` and the environment from T2. If `~/.modal.toml` does not exist, ask the user to run `modal token new` and continue with Part 1 meanwhile.
 
 ```bash
-bash scripts/modal_hf_secret.sh                                              # stores HF_TOKEN in Modal safely
+source "${MKP_WORK:-/storage/work/$USER}/envs/mkparity/bin/activate"
+bash scripts/modal_hf_secret.sh                                              # copies HF_TOKEN from .env into Modal safely
 modal run experiments/hazy/modal_app.py --limit 2 --reps 3 --ntok 64         # check run, about 5 GPU-minutes
 modal run experiments/hazy/modal_app.py --limit 32 --reps 20 --ntok 256      # full run
 python scripts/analyze.py results/mpk results/hazy --out results/summary
@@ -182,12 +150,4 @@ python scripts/analyze.py results/mpk results/hazy --out results/summary
 
 **Purpose:** The run tests whether the Hazy low-latency megakernel gives identical logits across repeated runs, given its bf16 `store_add` partial sums. The image compiles the megakernel without a GPU, so a build failure costs no GPU time.
 
-**Acceptance:** `results/hazy/<gpu>/e3_l32_r20_n256/` holds one file per prompt, and the summary shows per-step hash agreement across repetitions. The full run would take roughly 20 to 40 H100-minutes, about $1.50 to $3 at $3.95 per hour. If the image build fails, commit its log and stop T9 there.
-
-## Part D: optional runs, only when the user asks
-
-1. **O1, Hazy on the A100:** `slurm/submit.sh hazy_a100_build --gpu a100` tries the Hazy build with `GPU=A100`. The low-latency kernel uses Hopper TMA instructions, so it is expected to fail, and the log is the result either way. A success would remove the need for Modal.
-2. **O2, MPK on Llama-3.2-1B-Instruct:** Both megakernels would then run the same model. MPK's `demo/llama3/demo.py` lacks the `--prompt`, `--save-tokens`, `--ignore-eos` and `--max-new-tokens` flags the runner relies on, so this needs a second patch set in `patch_demo.py` and a `--demo llama3` option in `run_mpk.py`. Two risks are known. Llama-3.2-1B uses a head dimension of 64, while `tasks/ampere/single_batch_gqa.cuh` hard-codes 128 and `rotary_embedding.cuh` defaults to 128. The model also ties its input and output embeddings. The port would pass if the `ns` arm matches the `torch` arm on the first 16 tokens of the smoke prompt, and it would be capped at 6 GPU jobs before stopping with a written explanation.
-3. **O3, Qwen3-8B on the A40:** `slurm/submit.sh full --gpu a40 --env MKP_MODEL=Qwen/Qwen3-8B` would test whether the findings hold at a production size. It needs `MKP_MODELS=Qwen/Qwen3-8B bash slurm/setup.sh models` first, and it fits in 48 GB.
-4. **O4, vLLM baseline:** `harness/parity_vllm.py` would need its own virtual environment, because vLLM pins its own torch. It would compare the `ref` arm with the `ngram` arm at k = 4 on the A100.
-5. **O5, RTX 5060:** Nothing is planned yet. MPK rejects sm_120 today, and the port attempt is scheduled for week 3.
+**Acceptance:** `results/hazy/<gpu>/e3_l32_r20_n256/` holds one file per prompt, and the summary shows per-step hash agreement across repetitions. The full run would take roughly 20 to 40 H100-minutes, about $1.50 to $3 at $3.95 per hour. If the image build fails, commit its log and stop T10 there. Once the verdict is in, the M1 fixed-order combine from `docs/plan.md` would be the next H100 run, but only when the user asks for it.
