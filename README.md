@@ -18,6 +18,12 @@ Megakernels fuse a whole forward pass into one persistent GPU kernel. They are f
 |---|---|
 | `src/mkparity/` | Bitwise helpers, the TinyLlama model and the reduction-schedule emulator |
 | `harness/` | GPU parity harnesses for Hugging Face (`parity_hf.py`) and vLLM (`parity_vllm.py`) |
+| `experiments/mpk/` | MPK sweep runner (`run_mpk.py`), its demo patch and the test-mode kernel checks |
+| `experiments/hazy/` | Hazy run-to-run script and the Modal H100 wrapper |
+| `experiments/margins/` | fp32 margin analysis at each divergence |
+| `scripts/` | Prompt builder, environment report and the results summarizer |
+| `prompts/eval64_ids.json` | The ids of the fixed 64-prompt evaluation set |
+| `RUNBOOK.md` | Every GPU run the study needs, in order |
 | `experiments/emulator/` | CPU characterization scripts and the roofline cost model |
 | `results/emulator/` | Results from the first emulator runs (Nov 21, 2026) |
 | `tests/` | pytest suite that runs on CPU |
@@ -40,4 +46,4 @@ python experiments/emulator/run_long.py
 
 ## Status
 
-The CPU emulator results are directional only, because they model reduction schedules and not real kernels. No GPU measurements have been taken yet.
+The CPU emulator results are directional only, because they model reduction schedules and not real kernels. No GPU measurements have been taken yet. See `RUNBOOK.md` for the runs that would produce them.
