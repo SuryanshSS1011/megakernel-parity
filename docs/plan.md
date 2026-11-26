@@ -1,6 +1,6 @@
 # Characterizing and Mitigating Batch Invariance in LLM Megakernels
 
-Project plan, November 21, 2026. Hardware updated November 24, 2026.
+Project plan, November 21, 2026. Hardware updated November 24, 2026, and the run plan on November 26, 2026.
 
 ## 1. Bottom line
 
@@ -92,7 +92,7 @@ These are emulations, not GPU measurements. A 3.8M-parameter Llama-style charact
 These are roofline estimates, not measurements.
 
 1. M1 would add about 1 MB of fp32 partial traffic per Llama-1B decode step, which is 0.04% of the 2.47 GB weight stream. Its real cost would be one extra dependency per layer, which could be folded into the next instruction's prologue.
-2. M2 would run the decode kernel's arithmetic on k+1 rows and reuse each weight tile across rows. CUDA-core matvec stays memory-bound up to about 20 rows on an H100, about 54 rows on an A40 and only about 10 rows on an A100 80GB. Verify at k+1 ≤ 8 would therefore cost roughly one decode step in theory, but the A100 sits close to the compute-bound edge and would be the harder test of this fix. Real kernels reach about 78% of bandwidth, and extra register pressure would add some overhead.
+2. M2 would run the decode kernel's arithmetic on k+1 rows and reuse each weight tile across rows. CUDA-core matvec stays memory-bound up to about 20 rows on an H100, about 54 rows on an A40 and only about 13 rows on the A100 40GB that ROAR Collab provides. Verify at k+1 ≤ 8 would therefore cost roughly one decode step in theory, but the A100 sits closer to the compute-bound edge and would be the harder test of this fix. Real kernels reach about 78% of bandwidth, and extra register pressure would add some overhead.
 
 ## 5. Research questions and hypotheses
 
@@ -106,20 +106,21 @@ These are roofline estimates, not measurements.
 | Platform | Role | Cost | Main risk |
 |---|---|---|---|
 | A40, sm_86, 48 GB, 84 SMs | Main MPK platform for verify-vs-decode tests, kernel attribution and fixes, with Qwen3-0.6B, Qwen3-1.7B and Qwen3-8B | Free | MPK build or end-to-end run on Ampere is unverified |
-| A100, sm_80, 108 SMs | Same MPK builds and prompts for the SM-count comparison and a second Ampere data point | Free | Same as the A40 |
-| Modal H100 | Hazy latency megakernel with Llama-3.2-1B, plus MPK Hopper path as a cross-check | About $50, plus $30 per month free credit, for roughly 12 to 25 H100-hours | Gated Llama weights, Nsight counters may be blocked, debugging time |
+| A100 40GB, sm_80, 108 SMs | Same MPK builds and prompts for the SM-count comparison and a second Ampere data point | Free | Same as the A40 |
+| Modal H100 (ROAR Collab has no H100) | Hazy latency megakernel with Llama-3.2-1B, plus MPK Hopper path as a cross-check | About $50, plus $30 per month free credit, for roughly 12 to 25 H100-hours | Gated Llama weights, Nsight counters may be blocked, debugging time |
 | RTX 5060, sm_120, 8 GB | Local development, reference runs and a timeboxed MPK port of about 2 days in week 3 | Free | MPK needs a shared-memory budget and task-selection port |
 | CPU | The emulator in this plan | Free | Emulates schedules, not real kernels |
 
 ## 7. Experiments on real hardware
 
 1. **E0, setup and noise floor (week 1):** The team would build MPK on the A40 and A100 and run the Qwen3 demo with and without `--use-mirage`. It would record the logit or token hashes of 5 fresh launches. The first day would be a go/no-go spike on whether MPK runs on sm_86 and sm_80.
-2. **E1, MPK verify-vs-decode (week 1 to 2):** The team would compare MPK spec decode with `--spec-decode promptlookup` at k of 3 and 5 against MPK non-spec decode on Qwen3-0.6B and Qwen3-1.7B, using 64 Spec-Bench and HumanEval prompts at 512 tokens. Metrics would be exact-match rate, first-divergence position and acceptance length.
-3. **E2, kernel-level attribution (week 2):** Using MPK's standalone task harnesses in `tests/runtime_python`, the team would feed identical inputs to `paged_attention` and `single_batch_extend` and compare row t bitwise. It would do the same for the linear task at batch 1 versus k+1, and for the argmax partial grids.
-4. **E2b, SM-count invariance (week 2):** The team would run identical MPK builds, prompts and seeds on the A40 with 84 SMs and the A100 with 108 SMs, and compare token and logit hashes. MPK and Hazy both assign work by SM count, so this would test whether any floating-point reduction is partitioned by worker count. MPK's argmax partitions do change with worker count, but argmax is exact apart from ties.
-5. **E3, Hazy run-to-run (week 2, Modal):** The team would run the Hazy latency megakernel 20 times on 32 prompts at 256 tokens and hash the logits at every step. It would then add the M1 fixed-order combine and repeat. This would be the main H100 spend, at about 4 to 6 hours.
-6. **E4, mitigation in MPK (week 3):** The team would route decode and verify through one attention kernel with a fixed 64-token KV tile, either by running decode through the extend kernel with zero extra tokens or by making paged attention handle the verify rows. It would then remeasure E1 and E2.
-7. **E5, costs and scaling (week 3 to 4):** The team would measure step latency for each fix, exact-match rate versus generation length, and fidelity versus HF fp32 using KL and top-1 agreement.
+2. **E0b, stock-kernel baseline (week 1):** The team would run `harness/parity_hf.py` on the A40 to compare verify at k+1 rows against decode at one row on Hugging Face kernels, for Llama-3.2-1B-Instruct and Qwen3-1.7B in bf16 SDPA, bf16 eager and fp32. This would show how much drift stock kernels already have, and the Llama rows would connect the MPK and Hazy results through a shared model.
+3. **E1, MPK verify-vs-decode (week 1 to 2):** The team would compare MPK spec decode with `--spec-decode promptlookup` at k of 3 and 5 against MPK non-spec decode on Qwen3-0.6B and Qwen3-1.7B, using 64 Spec-Bench and HumanEval prompts at 512 tokens. Metrics would be exact-match rate, first-divergence position and acceptance length.
+4. **E2, kernel-level attribution (week 2):** Using MPK's standalone task harnesses in `tests/runtime_python`, the team would feed identical inputs to `paged_attention` and `single_batch_extend` and compare row t bitwise. It would do the same for the linear task at batch 1 versus k+1, and for the argmax partial grids.
+5. **E2b, SM-count invariance (week 2):** The team would run identical MPK builds, prompts and seeds on the A40 with 84 SMs and the A100 with 108 SMs, and compare token and logit hashes. MPK and Hazy both assign work by SM count, so this would test whether any floating-point reduction is partitioned by worker count. MPK's argmax partitions do change with worker count, but argmax is exact apart from ties.
+6. **E3, Hazy run-to-run (week 2, Modal):** The team would run the Hazy latency megakernel 20 times on 32 prompts at 256 tokens and hash the logits at every step. It would then add the M1 fixed-order combine and repeat. This would be the main H100 spend, at about 4 to 6 hours.
+7. **E4, mitigation in MPK (week 3):** The team would route decode and verify through one attention kernel with a fixed 64-token KV tile, either by running decode through the extend kernel with zero extra tokens or by making paged attention handle the verify rows. It would then remeasure E1 and E2.
+8. **E5, costs and scaling (week 3 to 4):** The team would measure step latency for each fix, exact-match rate versus generation length, and fidelity versus HF fp32 using KL and top-1 agreement.
 
 ## 8. Timeline
 
@@ -135,7 +136,7 @@ These are roofline estimates, not measurements.
 1. **MPK does not run on Ampere.** The team would fall back to MPK's Hopper path on Modal, which would roughly double H100 use, and keep the emulator as the controlled study.
 2. **Hazy run-to-run turns out to be deterministic on H100.** The result would still be reported, because it would show that TMA reduce-add ordering is stable in practice. The study would then focus on MPK.
 3. **The H100 budget runs out.** Development would stay local, and the cloud would run only finished batch jobs from saved images.
-4. **Gated Llama-3.2-1B weights.** The team would request access on day one.
+4. **Gated Llama-3.2-1B weights.** Access was granted on November 26, 2026, so this risk is closed.
 5. **Upstream reception.** Any issue or PR text would be written by hand and would lead with data.
 
 ## 10. Deliverables

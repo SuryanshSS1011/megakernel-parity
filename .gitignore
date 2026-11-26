@@ -21,3 +21,9 @@ results/**/kernel_*.cu
 results/**/test_rank*.cu
 results/**/*.demo.json
 *.so
+
+# secrets: tokens live in ~/.mkparity.env and ~/.modal.toml, never in the repo
+.env
+*.env
+.mkparity.env
+.modal.toml

@@ -27,7 +27,7 @@ Fidelity would be reported separately as KL divergence and top-1 agreement again
 
 ## 3. Workload
 
-1. **Models:** Qwen3-0.6B, Qwen3-1.7B and Qwen3-8B would run on MPK, and Llama-3.2-1B would run on Hazy.
+1. **Models:** Qwen3-0.6B, Qwen3-1.7B and Qwen3-8B would run on MPK, and Llama-3.2-1B-Instruct would run on Hazy. Llama-3.2-1B-Instruct and Qwen3-1.7B would also run on stock Hugging Face kernels as the baseline.
 2. **Prompts:** Each configuration would use 64 prompts drawn from Spec-Bench's six tasks and HumanEval.
 3. **Decoding:** Decoding would be greedy at temperature 0 with 512 new tokens, and spec decode would use prompt-lookup drafting.
 4. **Repeats:** Run-to-run tests would use 20 fresh launches on Hazy and 5 on MPK, each in a separate process.

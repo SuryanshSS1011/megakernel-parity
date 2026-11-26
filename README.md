@@ -10,6 +10,7 @@ Megakernels fuse a whole forward pass into one persistent GPU kernel. They are f
 |---|---|---|
 | Mirage Persistent Kernel (MPK) | A40 (sm_86), A100 (sm_80) | Does spec-decode output match plain decode, and does output match across SM counts? |
 | Hazy Megakernels, low-latency Llama-1B | H100 on Modal | Is the output run-to-run deterministic given bf16 `store_add` partial sums? |
+| Hugging Face Transformers, baseline | A40 | How far do stock kernels drift between verify and decode on the same models? |
 | MPK port, stretch goal | RTX 5060 (sm_120) | Can the Ampere task path run on consumer Blackwell? |
 
 ## Layout
@@ -23,7 +24,11 @@ Megakernels fuse a whole forward pass into one persistent GPU kernel. They are f
 | `experiments/margins/` | fp32 margin analysis at each divergence |
 | `scripts/` | Prompt builder, environment report and the results summarizer |
 | `prompts/eval64_ids.json` | The ids of the fixed 64-prompt evaluation set |
-| `RUNBOOK.md` | Every GPU run the study needs, in order |
+| `RUNBOOK.md` | Every GPU task the study needs, in order, with the steps only a person can do |
+| `CLAUDE.md` | Rules for a coding agent running the RUNBOOK tasks on the cluster |
+| `slurm/` | ROAR Collab setup, the `submit.sh` wrapper and one batch script per task |
+| `env.example` | Template for the private `~/.mkparity.env` that holds the token and Slurm account |
+| `docs/run_log.md` | Log of every GPU job, its outcome and any fix it needed |
 | `experiments/emulator/` | CPU characterization scripts and the roofline cost model |
 | `results/emulator/` | Results from the first emulator runs (Nov 21, 2026) |
 | `tests/` | pytest suite that runs on CPU |

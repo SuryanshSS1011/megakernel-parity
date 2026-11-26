@@ -83,6 +83,21 @@ def test_runner_dry_run_counts(tmp_path, capsys):
     assert "done=180 " in capsys.readouterr().out
 
 
+def test_runner_retry_failed(tmp_path, capsys):
+    prompts = tmp_path / "p.jsonl"
+    prompts.write_text("".join(json.dumps(dict(prompt_id=f"p{i}", prompt=f"q{i}")) + "\n" for i in range(2)))
+    base = tmp_path / "out" / run_mpk.slug(run_mpk.gpu_tag()["name"]) / "Qwen_Qwen3-1.7B" / "ns"
+    base.mkdir(parents=True)
+    (base / "p0__r0.json").write_text(json.dumps(dict(returncode=0)))
+    (base / "p1__r0.json").write_text(json.dumps(dict(returncode=1)))
+    common = ["--mirage-root", str(tmp_path), "--prompts", str(prompts), "--profile", "full",
+              "--arms", "ns", "--dry-run", "--out", str(tmp_path / "out")]
+    run_mpk.main(common)
+    assert "done=0 failed=0 skipped=2" in capsys.readouterr().out
+    run_mpk.main(common + ["--retry-failed"])
+    assert "done=1 failed=0 skipped=1" in capsys.readouterr().out
+
+
 def _run(arm, pid, tokens, rep=0, gpu="G1", system="mpk", **kw):
     return dict(schema="mkparity.run.v1", system=system, arm=arm, prompt_id=pid, rep=rep,
                 model="M", gpu=dict(name=gpu), returncode=0, token_ids=tokens, **kw)

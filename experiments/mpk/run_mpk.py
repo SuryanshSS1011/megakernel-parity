@@ -141,8 +141,10 @@ def run(args) -> int:
             for rep in range(arm.reps):
                 final = base / an / f"{p['prompt_id']}__r{rep}.json"
                 if final.exists() and not args.force:
-                    n_skip += 1
-                    continue
+                    prev_ok = json.loads(final.read_text()).get("returncode") == 0
+                    if prev_ok or not args.retry_failed:
+                        n_skip += 1
+                        continue
                 final.parent.mkdir(parents=True, exist_ok=True)
                 save = final.with_suffix(".demo.json")
                 this_kdir = kdir if arm.reuse else base / "_kernels" / f"{an}_{p['prompt_id']}_r{rep}"
@@ -214,6 +216,8 @@ def main(argv=None):
     ap.add_argument("--python", default=sys.executable)
     ap.add_argument("--timeout", type=int, default=3600)
     ap.add_argument("--force", action="store_true", help="rerun finished launches")
+    ap.add_argument("--retry-failed", action="store_true",
+                    help="rerun launches whose saved record has a nonzero return code")
     ap.add_argument("--stop-on-fail", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
     return run(ap.parse_args(argv))
