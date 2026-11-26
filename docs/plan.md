@@ -107,7 +107,7 @@ These are roofline estimates, not measurements.
 |---|---|---|---|
 | A40, sm_86, 48 GB, 84 SMs | Main MPK platform for verify-vs-decode tests, kernel attribution and fixes, with Qwen3-0.6B, Qwen3-1.7B and Qwen3-8B | Free | MPK build or end-to-end run on Ampere is unverified |
 | A100 40GB, sm_80, 108 SMs | Same MPK builds and prompts for the SM-count comparison and a second Ampere data point | Free | Same as the A40 |
-| Modal H100 (ROAR Collab has no H100) | Hazy latency megakernel with Llama-3.2-1B, plus MPK Hopper path as a cross-check | About $50, plus $30 per month free credit, for roughly 12 to 25 H100-hours | Gated Llama weights, Nsight counters may be blocked, debugging time |
+| Modal H100 (ROAR Collab has no H100) | Hazy latency megakernel with Llama-3.2-1B, plus MPK Hopper path as a cross-check | About $50, plus $30 per month free credit, for roughly 12 to 25 H100-hours | Nsight counters may be blocked, debugging time |
 | RTX 5060, sm_120, 8 GB | Local development, reference runs and a timeboxed MPK port of about 2 days in week 3 | Free | MPK needs a shared-memory budget and task-selection port |
 | CPU | The emulator in this plan | Free | Emulates schedules, not real kernels |
 
