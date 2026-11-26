@@ -30,13 +30,13 @@
   }
  },
  {
-  "gpu": "A100 80GB SXM",
+  "gpu": "A100 40GB",
   "model": "Llama-3.2-1B",
-  "weight_stream_ms": 1.212,
+  "weight_stream_ms": 1.59,
   "m1_extra_bytes": 1048576,
   "m1_extra_traffic_pct": 0.0424,
-  "crossover_rows_cuda_core": 9.6,
-  "crossover_rows_tensor_core": 153.0,
+  "crossover_rows_cuda_core": 12.5,
+  "crossover_rows_tensor_core": 200.6,
   "m2_step_time_ratio_vs_decode_cuda_core": {
    "1": 1.0,
    "2": 1.0,
@@ -45,13 +45,13 @@
   }
  },
  {
-  "gpu": "A100 80GB SXM",
+  "gpu": "A100 40GB",
   "model": "Qwen3-1.7B",
-  "weight_stream_ms": 1.687,
+  "weight_stream_ms": 2.212,
   "m1_extra_bytes": 1376256,
   "m1_extra_traffic_pct": 0.04,
-  "crossover_rows_cuda_core": 9.6,
-  "crossover_rows_tensor_core": 153.0,
+  "crossover_rows_cuda_core": 12.5,
+  "crossover_rows_tensor_core": 200.6,
   "m2_step_time_ratio_vs_decode_cuda_core": {
    "1": 1.0,
    "2": 1.0,

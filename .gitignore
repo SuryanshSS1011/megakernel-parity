@@ -13,3 +13,17 @@ data/
 *.nsys-rep
 *.ncu-rep
 runs/
+
+# MPK build artifacts written next to run results
+results/**/_kernels/
+results/**/task_graph_*.json
+results/**/kernel_*.cu
+results/**/test_rank*.cu
+results/**/*.demo.json
+*.so
+
+# secrets: the token lives in .env (local only) and ~/.modal.toml, never in git
+.env
+.env.*
+*.env
+.modal.toml
